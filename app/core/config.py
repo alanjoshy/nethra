@@ -1,8 +1,9 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    app_name: str = "Sentinel Backend"
+    app_name: str = "nethra Backend"
+    database_url: str
 
     class Config:
         env_file = ".env"

@@ -2,7 +2,10 @@
 Central location for dependency providers.
 Concrete implementations will be added incrementally.
 """
+from collections.abc import AsyncGenerator
+from app.core.database import AsyncSessionLocal
 
-def get_request_id() -> str:
-    # Placeholder for request-scoped dependency
-    return "request-id-placeholder"
+
+async def get_db() -> AsyncGenerator:
+    async with AsyncSessionLocal() as session:
+        yield session

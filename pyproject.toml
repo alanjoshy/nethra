@@ -10,6 +10,11 @@ python = "^3.11"
 fastapi = "^0.110.0"
 uvicorn = "^0.27.0"
 pydantic = "^2.6.0"
+sqlalchemy = "^2.0.45"
+asyncpg = "^0.31.0"
+geoalchemy2 = "^0.18.1"
+pydantic-settings = "^2.12.0"
+greenlet = "^3.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
