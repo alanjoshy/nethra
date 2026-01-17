@@ -1,40 +1,42 @@
 import asyncio
-import uuid
+import getpass
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
-from app.core.database import async_session
-from app.core.security import hash_password
-from app.models.user import User
-
-
-ADMIN_EMAIL = "admin@sentinel.local"
-ADMIN_PASSWORD = "ChangeMe123!"
-ADMIN_NAME = "System Admin"
+from app.shared.database import AsyncSessionLocal
+from app.shared.security import hash_password
+from app.modules.users.entities.user_entity import User
 
 
-async def seed_admin():
-    async with async_session() as session:
+async def create_admin():
+    email = input("Admin email: ").strip().lower()
+    name = input("Admin name: ").strip()
+    password = getpass.getpass("Admin password: ")
+
+    async with AsyncSessionLocal() as session:
+        # Check if user already exists
         result = await session.execute(
-            User.__table__.select().where(User.email == ADMIN_EMAIL)
+            select(User).where(User.email == email)
         )
-        if result.first():
-            print("Admin already exists")
+        existing_user = result.scalar_one_or_none()
+
+        if existing_user:
+            print("❌ User with this email already exists.")
             return
 
-        admin = User(
-            id=uuid.uuid4(),
-            name=ADMIN_NAME,
-            email=ADMIN_EMAIL,
-            password_hash=hash_password(ADMIN_PASSWORD),
+        admin_user = User(
+            name=name,
+            email=email,
+            password_hash=hash_password(password),
             role="admin",
             is_active=True,
         )
 
-        session.add(admin)
+        session.add(admin_user)
         await session.commit()
-        print("Admin user created")
+
+        print("✅ Admin user created successfully.")
 
 
 if __name__ == "__main__":
-    asyncio.run(seed_admin())
+    asyncio.run(create_admin())

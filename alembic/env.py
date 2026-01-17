@@ -2,8 +2,13 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from app.core.base import Base
-from app import models  
+from app.shared.database import Base
+# Import all entities so Alembic can detect them
+from app.modules.users.entities.user_entity import User
+from app.modules.cases.entities.case_entity import Case
+from app.modules.cases.entities.case_status_history_entity import CaseStatusHistory
+from app.modules.incidents.entities.incident_entity import Incident
+from app.modules.media.entities.media_entity import Media
 from alembic import context
 
 # this is the Alembic Config object, which provides
