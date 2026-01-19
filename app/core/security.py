@@ -1,4 +1,5 @@
 import pyseto
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Dict
 
@@ -55,7 +56,11 @@ def decode_token(token: str) -> Dict:
             token,
         )
 
-        payload = decoded.payload
+        # pyseto returns payload as bytes, need to parse as JSON
+        if isinstance(decoded.payload, bytes):
+            payload = json.loads(decoded.payload.decode("utf-8"))
+        else:
+            payload = decoded.payload
 
         # Expiration check (mandatory)
         now_ts = int(datetime.now(tz=timezone.utc).timestamp())
@@ -64,8 +69,13 @@ def decode_token(token: str) -> Dict:
 
         return payload
 
-    except pyseto.PasetomessageError:
-        raise ValueError("Invalid token")
+    except (pyseto.DecryptError, json.JSONDecodeError) as e:
+        raise ValueError(f"Invalid token: {e}")
 
-    except Exception:
-        raise ValueError("Token validation failed")
+    except ValueError:
+        # Re-raise ValueError (including "Token has expired")
+        raise
+
+    except Exception as e:
+        raise ValueError(f"Token validation failed: {e}")
+

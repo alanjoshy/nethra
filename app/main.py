@@ -1,8 +1,3 @@
-"""
-Main application entry point.
-Modular monolith architecture - each module is microservice-ready.
-"""
-
 import logging
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -17,9 +12,9 @@ from app.shared.middleware import (
     general_exception_handler,
 )
 from app.shared.exceptions import NethraException
-
 # Import module routers (only public APIs)
 from app.modules.auth import auth_router
+from app.modules.users.controllers.user_controller import router as users_router
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +31,7 @@ app.add_exception_handler(Exception, general_exception_handler)
 
 # Include module routers
 app.include_router(auth_router)
+app.include_router(users_router)
 
 
 @app.on_event("startup")

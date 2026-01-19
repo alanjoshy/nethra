@@ -2,7 +2,9 @@
 Authentication module schemas.
 """
 
-from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
+from uuid import UUID
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class LoginRequest(BaseModel):
@@ -29,6 +31,22 @@ class UserResponse(BaseModel):
     role: str = Field(..., description="User role (admin/officer/analyst)")
     is_active: bool = Field(..., description="Whether the user is active")
     created_at: str = Field(..., description="User creation timestamp")
+    
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid_to_str(cls, v):
+        """Convert UUID to string."""
+        if isinstance(v, UUID):
+            return str(v)
+        return v
+    
+    @field_validator('created_at', mode='before')
+    @classmethod
+    def convert_datetime_to_str(cls, v):
+        """Convert datetime to ISO format string."""
+        if isinstance(v, datetime):
+            return v.isoformat()
+        return v
     
     class Config:
         from_attributes = True

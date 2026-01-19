@@ -9,7 +9,7 @@ package-mode = false
 python = "^3.11"
 fastapi = "^0.110.0"
 uvicorn = "^0.27.0"
-pydantic = "^2.6.0"
+pydantic = {extras = ["email"], version = "^2.12.5"}
 sqlalchemy = "^2.0.45"
 asyncpg = "^0.31.0"
 geoalchemy2 = "^0.18.1"
