@@ -27,3 +27,23 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class UserUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, min_length=2)
+    role: Optional[str] = Field(None, pattern="^(admin|officer|analyst)$")
+    is_active: Optional[bool] = None
+
+
+class UserResponse(BaseModel):
+    id: str
+    name: str
+    email: EmailStr
+    role: str
+    is_active: bool
+    created_at: datetime    
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
+

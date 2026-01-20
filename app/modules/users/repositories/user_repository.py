@@ -37,3 +37,13 @@ class UserRepository:
         await db.refresh(user)
         return user
 
+    @staticmethod
+    async def save(db: AsyncSession, user: User) -> User:
+        await db.commit()
+        await db.refresh(user)
+        return user
+
+    @staticmethod
+    async def get_all(db: AsyncSession) -> list[User]:
+        result = await db.execute(select(User))
+        return result.scalars().all()

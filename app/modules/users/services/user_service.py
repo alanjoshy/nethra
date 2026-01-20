@@ -29,3 +29,40 @@ class UserService:
         )
 
         return await UserRepository.create(db, user)
+
+    @staticmethod
+    async def list_users(db: AsyncSession) -> list[User]:
+        return await UserRepository.get_all(db)
+
+    @staticmethod
+    async def get_user(db: AsyncSession, user_id) -> User:
+        user = await UserRepository.get_by_id(db, user_id)
+        if not user:
+            raise NotFoundError("User not found")
+        return user 
+
+    @staticmethod
+    async def update_user(
+        db: AsyncSession,
+        user_id,
+        name: str | None,
+        role: str | None,
+        is_active: bool | None,
+    ) -> User:
+        user = await UserService.get_user(db, user_id)
+
+        if name is not None:
+            user.name = name
+        if role is not None:
+            user.role = role
+        if is_active is not None:
+            user.is_active = is_active
+
+        return await UserRepository.save(db, user)
+
+    @staticmethod
+    async def deactivate_user(db: AsyncSession, user_id) -> User:
+        user = await UserService.get_user(db, user_id)
+        user.is_active = False
+        return await UserRepository.save(db, user)
+
