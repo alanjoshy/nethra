@@ -61,7 +61,7 @@ async def create_user(
         role=payload.role,
     )
 
-
+# Update user endpoint
 @router.put("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def update_user(
     user_id: UUID,
