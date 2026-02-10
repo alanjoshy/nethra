@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.shared.database.dependencies import get_db
 from app.core.health import check_database_connection
+from app.core.config import settings
+from app.shared.database.auto_migrate import run_auto_migrate
 from app.shared.middleware import (
     nethra_exception_handler,
     validation_exception_handler,
@@ -36,6 +38,10 @@ app.include_router(users_router)
 
 @app.on_event("startup")
 async def on_startup():
+    # Auto-migrate in development mode
+    if settings.auto_migrate and settings.environment == "development":
+        run_auto_migrate()
+
     try:
         async for db in get_db():
             await check_database_connection(db)
@@ -60,3 +66,4 @@ async def db_health(db: AsyncSession = Depends(get_db)):
             status_code=503,
             detail="database not reachable",
         )
+
