@@ -10,3 +10,19 @@ poetry.lock
 
 
 .running.md
+
+
+# New feature              feat
+# Bug fix                  fix
+# Cleanup / config         chore
+# Code restructure         refactor
+# Docs only                docs
+# Tests                    test
+# Performance improvement  perf
+# Code formatting/style    style
+# Build system changes     build
+# CI/CD changes            ci
+# Revert a commit          revert
+# Remove code/files        remove
+# Security fix             security
+# Work in progress         wip

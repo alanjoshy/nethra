@@ -4,11 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from app.shared.database import Base
 # Import all entities so Alembic can detect them
-from app.modules.users.entities.user_entity import User
-from app.modules.cases.entities.case_entity import Case
-from app.modules.cases.entities.case_status_history_entity import CaseStatusHistory
-from app.modules.incidents.entities.incident_entity import Incident
-from app.modules.media.entities.media_entity import Media
+import app.shared.database.models  # noqa: F401
 from alembic import context
 from app.core.config import settings
 
@@ -32,6 +28,12 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and name == "spatial_ref_sys":
+        return False
+    return True
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -50,6 +52,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -71,11 +74,14 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, 
+            target_metadata=target_metadata,
+            include_object=include_object,
         )
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 
 if context.is_offline_mode():
