@@ -16,22 +16,43 @@ class IncidentRepository:
     Handles all database operations for incidents.
     """
     
-    async def get_incident_by_id(
-        self,
+    @staticmethod
+    async def create(
+        db: AsyncSession,
+        incident: Incident
+    ) -> Incident:
+        """Create a new incident."""
+        db.add(incident)
+        await db.commit()
+        await db.refresh(incident)
+        return incident
+    
+    @staticmethod
+    async def get_by_id(
         db: AsyncSession,
         incident_id: UUID
     ) -> Optional[Incident]:
-        """
-        Get an incident by ID.
-        
-        Args:
-            db: Database session
-            incident_id: Incident UUID
-        
-        Returns:
-            Incident object if found, None otherwise
-        """
+        """Get an incident by ID."""
         result = await db.execute(
             select(Incident).where(Incident.id == incident_id)
         )
         return result.scalar_one_or_none()
+    
+    @staticmethod
+    async def get_all(db: AsyncSession) -> list[Incident]:
+        """Get all incidents."""
+        result = await db.execute(select(Incident))
+        return list(result.scalars().all())
+    
+    @staticmethod
+    async def save(db: AsyncSession, incident: Incident) -> Incident:
+        """Update an existing incident."""
+        await db.commit()
+        await db.refresh(incident)
+        return incident
+    
+    @staticmethod
+    async def delete(db: AsyncSession, incident: Incident) -> None:
+        """Delete an incident."""
+        await db.delete(incident)
+        await db.commit()

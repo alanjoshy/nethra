@@ -17,6 +17,9 @@ from app.shared.exceptions import NethraException
 # Import module routers (only public APIs)
 from app.modules.auth import auth_router
 from app.modules.users.controllers.user_controller import router as users_router
+from app.modules.incidents.controllers import router as incidents_router
+from app.modules.cases.controllers import router as cases_router
+from app.modules.media.controllers import router as media_router
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +37,9 @@ app.add_exception_handler(Exception, general_exception_handler)
 # Include module routers
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(incidents_router)
+app.include_router(cases_router)
+app.include_router(media_router)
 
 
 @app.on_event("startup")
