@@ -100,3 +100,46 @@ async def delete_case(
 ):
     """Delete a case (admin only)."""
     await CaseService.delete_case(db, case_id)
+
+
+# Person Linking Endpoints
+
+from app.modules.persons.services.person_service import PersonService
+from app.modules.persons.schemas import CasePersonLinkRequest, CasePersonResponse
+
+
+@router.post("/{case_id}/persons", response_model=CasePersonResponse, status_code=status.HTTP_201_CREATED)
+async def link_person_to_case(
+    case_id: UUID,
+    payload: CasePersonLinkRequest,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """Link a person to a case."""
+    return await PersonService.link_person_to_case(
+        db=db,
+        case_id=case_id,
+        person_id=payload.person_id,
+        role=payload.role,
+    )
+
+
+@router.get("/{case_id}/persons", response_model=list[CasePersonResponse], status_code=status.HTTP_200_OK)
+async def list_case_persons(
+    case_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """List all persons linked to a case."""
+    return await PersonService.get_persons_for_case(db, case_id)
+
+
+@router.delete("/{case_id}/persons/{person_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_person_from_case(
+    case_id: UUID,
+    person_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """Remove a person from a case (admin only)."""
+    await PersonService.remove_person_from_case(db, case_id, person_id)

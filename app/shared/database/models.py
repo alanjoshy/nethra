@@ -10,3 +10,9 @@ from app.modules.cases.entities.case_status_history_entity import CaseStatusHist
 
 # Media
 from app.modules.media.entities.media_entity import Media  # noqa: F401
+
+# Persons
+from app.modules.persons.entities.person_entity import Person, CasePerson  # noqa: F401
+
+# Tags
+from app.modules.tags.entities.tag_entity import Tag, IncidentTag  # noqa: F401

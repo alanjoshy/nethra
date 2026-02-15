@@ -20,6 +20,9 @@ from app.modules.users.controllers.user_controller import router as users_router
 from app.modules.incidents.controllers import router as incidents_router
 from app.modules.cases.controllers import router as cases_router
 from app.modules.media.controllers import router as media_router
+from app.modules.persons.controllers import router as persons_router
+from app.modules.tags.controllers import router as tags_router
+from app.modules.intelligence.controllers import router as intelligence_router
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +43,9 @@ app.include_router(users_router)
 app.include_router(incidents_router)
 app.include_router(cases_router)
 app.include_router(media_router)
+app.include_router(persons_router)
+app.include_router(tags_router)
+app.include_router(intelligence_router)
 
 
 @app.on_event("startup")

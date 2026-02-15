@@ -90,3 +90,45 @@ async def delete_incident(
 ):
     """Delete an incident (admin only)."""
     await IncidentService.delete_incident(db, incident_id)
+
+
+# Tagging Endpoints
+
+from app.modules.tags.services.tag_service import TagService
+from app.modules.tags.schemas import IncidentTagLinkRequest, IncidentTagResponse
+
+
+@router.post("/{incident_id}/tags", response_model=list[IncidentTagResponse], status_code=status.HTTP_201_CREATED)
+async def tag_incident(
+    incident_id: UUID,
+    payload: IncidentTagLinkRequest,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """Link tags to an incident."""
+    return await TagService.tag_incident(
+        db=db,
+        incident_id=incident_id,
+        tag_names=payload.tags,
+    )
+
+
+@router.get("/{incident_id}/tags", response_model=list[IncidentTagResponse], status_code=status.HTTP_200_OK)
+async def list_incident_tags(
+    incident_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """List all tags for an incident."""
+    return await TagService.get_tags_for_incident(db, incident_id)
+
+
+@router.delete("/{incident_id}/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_tag_from_incident(
+    incident_id: UUID,
+    tag_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """Remove a tag from an incident (admin only)."""
+    await TagService.remove_tag_from_incident(db, incident_id, tag_id)
