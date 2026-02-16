@@ -49,3 +49,35 @@ async def get_current_user(
         )
 
     return user
+
+
+async def require_analyst(
+    current_user = Depends(get_current_user),
+):
+    """
+    Require user to have admin or analyst role.
+    """
+    from app.common.constants import UserRole
+    
+    if current_user.role not in [UserRole.ADMIN, UserRole.ANALYST]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin or Analyst role required",
+        )
+    return current_user
+
+
+async def require_admin(
+    current_user = Depends(get_current_user),
+):
+    """
+    Require user to have admin role.
+    """
+    from app.common.constants import UserRole
+    
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role required",
+        )
+    return current_user

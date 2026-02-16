@@ -22,7 +22,11 @@ from app.modules.cases.controllers import router as cases_router
 from app.modules.media.controllers import router as media_router
 from app.modules.persons.controllers import router as persons_router
 from app.modules.tags.controllers import router as tags_router
-from app.modules.intelligence.controllers import router as intelligence_router
+from app.modules.intelligence.controllers import (
+    router as intelligence_router,
+    behavior_router,
+    risk_router,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +49,10 @@ app.include_router(cases_router)
 app.include_router(media_router)
 app.include_router(persons_router)
 app.include_router(tags_router)
+# Phase 1 Intelligence routers
 app.include_router(intelligence_router)
+app.include_router(behavior_router)
+app.include_router(risk_router)
 
 
 @app.on_event("startup")
