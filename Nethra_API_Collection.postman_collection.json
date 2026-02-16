@@ -1,0 +1,953 @@
+{
+	"info": {
+		"_postman_id": "nethra-api-collection-2024",
+		"name": "Nethra Backend - Complete API Collection",
+		"description": "Complete API collection for Nethra Criminal Case Management System\n\n## Getting Started\n\n1. **Set Environment Variables**:\n   - `base_url`: http://localhost:8000\n   - `access_token`: (auto-set after login)\n   - `user_id`: (auto-set after registration)\n\n2. **Follow Step-by-Step**:\n   - Start with Authentication folder (Register → Login)\n   - Use the access_token for all authenticated requests\n   - Follow the folder order for logical testing flow\n\n3. **Roles**:\n   - ADMIN: Full access to all endpoints\n   - ANALYST: Access to intelligence and geospatial endpoints\n   - OFFICER: Basic case management\n\n## Module Overview\n- Authentication & Users\n- Core Modules (Cases, Incidents, Media, Persons, Tags)\n- Phase 1: Intelligence & Analysis\n- Phase 2: Geospatial & Analytics",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🔐 Step 1: Authentication",
+			"description": "Start here: Register a user and login to get access token",
+			"item": [
+				{
+					"name": "Register User (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('user_id', response.id);",
+									"    console.log('User registered successfully. ID:', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@nethra.local\",\n  \"password\": \"Admin@123456\",\n  \"full_name\": \"System Administrator\",\n  \"role\": \"admin\",\n  \"badge_number\": \"ADMIN001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Register a new admin user. Save the returned user ID for future reference."
+					},
+					"response": []
+				},
+				{
+					"name": "Register User (Analyst)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"analyst@nethra.local\",\n  \"password\": \"Analyst@123456\",\n  \"full_name\": \"Crime Analyst\",\n  \"role\": \"analyst\",\n  \"badge_number\": \"ANL001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('access_token', response.access_token);",
+									"    console.log('Login successful. Token saved to environment.');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@nethra.local\",\n  \"password\": \"Admin@123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login and get access token. Token is automatically saved to environment."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👤 Step 2: User Management",
+			"description": "Manage users after authentication",
+			"item": [
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/me",
+							"host": ["{{base_url}}"],
+							"path": ["users", "me"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["users"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📋 Step 3: Cases & Incidents",
+			"description": "Create cases and incidents before using intelligence features",
+			"item": [
+				{
+					"name": "Create Incident",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('incident_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Burglary\",\n  \"description\": \"Break-in at residential property\",\n  \"occurred_at\": \"2026-02-15T21:30:00Z\",\n  \"latitude\": 12.9716,\n  \"longitude\": 77.5946,\n  \"district\": \"Central\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/incidents",
+							"host": ["{{base_url}}"],
+							"path": ["incidents"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Incidents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/incidents?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["incidents"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Case",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('case_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Residential Burglary Investigation\",\n  \"primary_incident_id\": \"{{incident_id}}\",\n  \"status\": \"open\",\n  \"notes\": \"Initial investigation started\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cases",
+							"host": ["{{base_url}}"],
+							"path": ["cases"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Cases",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cases?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["cases"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🏷️ Step 4: Tags & Persons",
+			"description": "Add tags and persons to cases for intelligence analysis",
+			"item": [
+				{
+					"name": "Create Tag",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('tag_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"theft\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tags",
+							"host": ["{{base_url}}"],
+							"path": ["tags"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Tags",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tags",
+							"host": ["{{base_url}}"],
+							"path": ["tags"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Person (Suspect)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('person_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"date_of_birth\": \"1990-05-15\",\n  \"contact_info\": \"+91-9876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/persons",
+							"host": ["{{base_url}}"],
+							"path": ["persons"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Persons",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/persons?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["persons"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🧠 Phase 1: Intelligence & Analysis",
+			"description": "Advanced intelligence endpoints (Analyst role required)",
+			"item": [
+				{
+					"name": "Related Cases Intelligence",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/intelligence/related-cases?case_id={{case_id}}&radius_km=5&days_range=90&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["intelligence", "related-cases"],
+							"query": [
+								{
+									"key": "case_id",
+									"value": "{{case_id}}",
+									"description": "Reference case UUID"
+								},
+								{
+									"key": "radius_km",
+									"value": "5",
+									"description": "Search radius in km"
+								},
+								{
+									"key": "days_range",
+									"value": "90",
+									"description": "Time range in days"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Find cases related to a reference case using multi-dimensional scoring"
+					},
+					"response": []
+				},
+				{
+					"name": "Repeat Offenders Detection",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/intelligence/repeat-offenders?tags=theft,assault&min_cases=2",
+							"host": ["{{base_url}}"],
+							"path": ["intelligence", "repeat-offenders"],
+							"query": [
+								{
+									"key": "tags",
+									"value": "theft,assault",
+									"description": "Comma-separated tag filters"
+								},
+								{
+									"key": "min_cases",
+									"value": "2",
+									"description": "Minimum case count"
+								},
+								{
+									"key": "from_date",
+									"value": "2026-01-01",
+									"disabled": true
+								},
+								{
+									"key": "to_date",
+									"value": "2026-12-31",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Identify suspects involved in multiple similar cases"
+					},
+					"response": []
+				},
+				{
+					"name": "Pattern Correlation Analysis",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/intelligence/pattern-correlation?min_occurrence=2",
+							"host": ["{{base_url}}"],
+							"path": ["intelligence", "pattern-correlation"],
+							"query": [
+								{
+									"key": "min_occurrence",
+									"value": "2",
+									"description": "Minimum occurrence threshold"
+								},
+								{
+									"key": "case_id",
+									"value": "{{case_id}}",
+									"description": "Optional reference case",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Analyze tag co-occurrence patterns and suspect mappings"
+					},
+					"response": []
+				},
+				{
+					"name": "Behavioral Similarity Analysis",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/behavior/similar-cases/{{case_id}}?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["behavior", "similar-cases", "{{case_id}}"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Find cases with similar behavioral patterns (time, tags, MO)"
+					},
+					"response": []
+				},
+				{
+					"name": "Risk Scoring (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/risk/person/{{person_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["risk", "person", "{{person_id}}"]
+						},
+						"description": "Calculate dynamic risk score for a suspect (Admin only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📍 Phase 2: Geospatial Intelligence",
+			"description": "Geospatial visualization and clustering (Analyst role required)",
+			"item": [
+				{
+					"name": "Crime Heatmap",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/geo/heatmap?min_lat=12.95&min_lng=77.55&max_lat=12.98&max_lng=77.60&grid_size_meters=250",
+							"host": ["{{base_url}}"],
+							"path": ["geo", "heatmap"],
+							"query": [
+								{
+									"key": "min_lat",
+									"value": "12.95",
+									"description": "Bounding box minimum latitude"
+								},
+								{
+									"key": "min_lng",
+									"value": "77.55",
+									"description": "Bounding box minimum longitude"
+								},
+								{
+									"key": "max_lat",
+									"value": "12.98",
+									"description": "Bounding box maximum latitude"
+								},
+								{
+									"key": "max_lng",
+									"value": "77.60",
+									"description": "Bounding box maximum longitude"
+								},
+								{
+									"key": "grid_size_meters",
+									"value": "250",
+									"description": "Grid cell size in meters"
+								},
+								{
+									"key": "from_date",
+									"value": "2026-01-01",
+									"disabled": true
+								},
+								{
+									"key": "to_date",
+									"value": "2026-12-31",
+									"disabled": true
+								},
+								{
+									"key": "tags",
+									"value": "theft,burglary",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Generate crime density heatmap within geographic bounds"
+					},
+					"response": []
+				},
+				{
+					"name": "Crime Cluster Detection",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/geo/clusters?radius_meters=500&min_points=3",
+							"host": ["{{base_url}}"],
+							"path": ["geo", "clusters"],
+							"query": [
+								{
+									"key": "radius_meters",
+									"value": "500",
+									"description": "Clustering radius in meters"
+								},
+								{
+									"key": "min_points",
+									"value": "3",
+									"description": "Minimum points to form cluster"
+								},
+								{
+									"key": "from_date",
+									"value": "2026-01-01",
+									"disabled": true
+								},
+								{
+									"key": "tags",
+									"value": "theft",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Detect spatial crime clusters using density-based algorithm"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔍 Phase 2: Unified Search",
+			"description": "Multi-filter advanced search (Analyst role required)",
+			"item": [
+				{
+					"name": "Unified Advanced Search",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/search?radius_km=5&lat=12.9716&lng=77.5946&tags=theft&from_date=2026-01-01&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["search"],
+							"query": [
+								{
+									"key": "radius_km",
+									"value": "5",
+									"description": "Geographic radius in km",
+									"disabled": true
+								},
+								{
+									"key": "lat",
+									"value": "12.9716",
+									"description": "Latitude (required with radius)",
+									"disabled": true
+								},
+								{
+									"key": "lng",
+									"value": "77.5946",
+									"description": "Longitude (required with radius)",
+									"disabled": true
+								},
+								{
+									"key": "tags",
+									"value": "theft",
+									"description": "Comma-separated tag filters"
+								},
+								{
+									"key": "from_date",
+									"value": "2026-01-01",
+									"description": "Start date"
+								},
+								{
+									"key": "to_date",
+									"value": "2026-12-31",
+									"disabled": true
+								},
+								{
+									"key": "suspect_name",
+									"value": "John",
+									"description": "Partial suspect name match",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "open",
+									"description": "Case status",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Multi-filter case search with performance optimization"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📊 Phase 2: Analytics (Admin Only)",
+			"description": "Aggregated analytics reporting (Admin role required)",
+			"item": [
+				{
+					"name": "Crime by Location",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/analytics/crime-by-location",
+							"host": ["{{base_url}}"],
+							"path": ["analytics", "crime-by-location"],
+							"query": [
+								{
+									"key": "district",
+									"value": "Central",
+									"disabled": true
+								},
+								{
+									"key": "from_date",
+									"value": "2026-01-01",
+									"disabled": true
+								},
+								{
+									"key": "to_date",
+									"value": "2026-12-31",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Aggregate incidents by district/region"
+					},
+					"response": []
+				},
+				{
+					"name": "Pattern Frequency",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/analytics/pattern-frequency",
+							"host": ["{{base_url}}"],
+							"path": ["analytics", "pattern-frequency"]
+						},
+						"description": "Aggregate tag occurrence statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Monthly Trends",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/analytics/monthly-trends?year=2026",
+							"host": ["{{base_url}}"],
+							"path": ["analytics", "monthly-trends"],
+							"query": [
+								{
+									"key": "year",
+									"value": "2026",
+									"description": "Year to analyze"
+								}
+							]
+						},
+						"description": "Time-series crime distribution by month"
+					},
+					"response": []
+				},
+				{
+					"name": "Repeat Offender Overview",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/analytics/repeat-offenders?min_cases=2",
+							"host": ["{{base_url}}"],
+							"path": ["analytics", "repeat-offenders"],
+							"query": [
+								{
+									"key": "min_cases",
+									"value": "2",
+									"description": "Minimum case count threshold"
+								}
+							]
+						},
+						"description": "Aggregate repeat offenders with case counts"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "❤️ Health Checks",
+			"description": "System health and database connectivity",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Database Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/db",
+							"host": ["{{base_url}}"],
+							"path": ["health", "db"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "incident_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "case_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tag_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "person_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

@@ -27,6 +27,10 @@ from app.modules.intelligence.controllers import (
     behavior_router,
     risk_router,
 )
+# Phase 2 imports
+from app.modules.geo.controllers import router as geo_router
+from app.modules.search.controllers import router as search_router
+from app.modules.analytics.controllers import router as analytics_router
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +57,10 @@ app.include_router(tags_router)
 app.include_router(intelligence_router)
 app.include_router(behavior_router)
 app.include_router(risk_router)
+# Phase 2 Geospatial & Analytics routers
+app.include_router(geo_router)
+app.include_router(search_router)
+app.include_router(analytics_router)
 
 
 @app.on_event("startup")
